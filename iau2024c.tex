@@ -1,0 +1,335 @@
+
+\NeedsTeXFormat{LaTeX2e}
+
+\documentclass{iau_FM}
+
+\pagenumbering{gobble}
+
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb,latexsym,bm,mathrsfs,sansmath,array}
+\usepackage{hyperref}
+%\usepackage{natbib}
+\usepackage[natbib=true]{biblatex}
+\addbibresource{rob.bib}
+
+\title{Ilifu: A cloud computing system supporting Astronomy and Bioinformatics}
+\DeclareUnicodeCharacter{202F}{\,}
+
+\author{Rob Simmonds}
+
+\affiliation{Inter-university Institute for Data Intensive Astronomy \\ South Africa}
+\pubyear{2024}
+\setcounter{page}{1}
+\jname{Astronomy in Focus, Focus Meeting 7} 
+\editors{S. S. Mohamed, A. R. Taylor and B. Vaidya}
+
+%\date{}
+
+%\graphicspath{ {./IMAGES/} }
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This paper describes the ilifu cluster which is an OpenStack based cloud system located at the University of Cape Town. 
+It is operated by the Inter-university Institute for Data Intensive Astronomy and mainly supports 
+astronomy and bioinformatics research. In terms of Astronomy the main data processed is from the MeerKAT and MeerLicht 
+telescopes that are both based in South Africa.
+ \end{abstract}
+ \noindent {\bf Keywords:} OpenStack, IaaS cloud, Astronomy, Bioinformatics
+
+\section{Introduction}
+ 
+The ilifu cluster was established in 2016 and 
+is operated by the Inter-university Institute for Data Intensive Astronomy (IDIA) which is an
+institute that spans three universities; the University of Cape Town (UCT), 
+the University of the 
+Western Cape (UWC) and University of Pretoria (UP).
+The cluster was built using the management nodes from an 
+existing OpenStack (https://www.openstack.org/) system that was constructed to explore the 
+use of an OpenStack based Infrastructure of a Service (IaaS) cloud system to support university research. 
+This meant the
+system could be brought into production very quickly since as it basically just needed the new
+network switches, the compute and storage nodes added to the working OpenStack system.
+The name ilifu means
+Cloud in the local Xhosa language and the system is now used primarily to support
+astronomy and bioinformatics research.
+
+The rest of this paper is laid out as follows. Section~\ref{sec:hardware}
+ explains the hardware infrastructure and how
+the system is connected to the research networks. Section~\ref{sec:middleware} 
+explains the middleware employed whilw
+Section~\ref{sec:core_software} describes the core software that is run.
+Section~\ref{sec:gateway} then explains the IDIA
+science gateway that was added to the system in 2023. Section~\ref{sec:users}
+talks about the main uses of the system and 
+the paper is concluded and future work is discussed in
+Section~\ref{sec:conclusions}.
+
+
+
+% Hardware architecture
+% Middleware
+% Science Gateway
+% Userbase
+% Astro projects
+% Bioinformatics projects
+% The path forward
+
+
+\section{Hardware}
+\label{sec:hardware}
+
+
+
+The ilifu cluster currently has over 4000 processor cores with most nodes having 256GB of RAM and 32 cores. 
+Some nodes have 512GB 
+and one has 1.5TB of RAM. The large memory node is mainly used for remote visualisation 
+ and testing of Virtual
+Reality (VR) streaming. The cluster has over 13 Petabytes of raw storage which is mainly provided
+ by hard drives, but 
+does include SSDs to provide backing store for virtual machines (VMs) and provide
+POSIX shares used mainly
+to support visualisation. The main
+ cluster interconnect is a mix of 50Gb/s and 100Gb/s Ethernet using Mellanox SN2700 switches, 
+ with the storage servers connected at 100Gb/s and the 
+most of compute servers connected at 50Gb/s. The cluster is connected to 
+the SANReN (https://saran.ac.za) research network with a 100Gb/s link
+that then connects to a 400Gb/s link within South Africa and out to Europe. 
+The network uplink connects 
+to SANReN at the main point of presence in Cape Town and is not shared
+with any of the UCT campus traffic.
+
+
+\section{Middleware}
+\label{sec:middleware}
+
+Ilifu utilises OpenStack Infrastructure as a Service middleware that allows us to run VMs
+ or bare-metal deployments
+utilising the Ironic subsystem. Recently we have also been experimenting with 
+Kubernetes (K8s) (https://kubernetes.io/)
+as that is an interesting way of supporting interactive applications and for deployment
+in general, in particular for micro-service architecture applications. We have not promoted K8s for
+ production use yet, since we are still learning the best ways to have it interact with our
+ other low level environments.
+We use Ceph to provide storage. This provides ephemeral storage to back VM
+block storage to create volumes (mainly on SSDs), Object Storage for supporting projects
+with large numbers of small files and
+CephFS shares for creating large cluster file-systems. All the storage is configurable from the 
+OpenStack Horizon dashboard enabling users to create their own storage entities
+and this also to makes it very fast for the support team to create new computing
+and storage environments when needed.
+
+Some projects have long lived cluster environments within ilifu which they maintain themselves using
+the OpenStack tools.
+Examples of this is the cluster that is used to process the data from the MeerLicht
+ (https://science.uct.ac.za/meerlicht) telescope which
+is an optical telescope that tracks the MeerKAT~\cite{meerkat} telescope's observations. 
+This functionality
+is also employed
+by some of the bioinformatics projects to support custom enonments and used to add
+custom environments to support specific workshops and hackthons.
+
+Authentication and authorisation are handled by KeyCloak (https://www.keycloak.org). 
+This system enables us 
+to use local passwords,
+or preferably to use federated identity providers that can be accessed through SAFIRE 
+(https://safire.ac.za/), 
+EduGain (https://edugain.org/) and EGI's Check-in (https://www.egi.eu/service/check-in/).
+ It also provides Single Signon (SSO)
+to all our 
+web based applications when they are accessed through the 
+IDIA Science Gateway (see Section~\ref{sec:gateway}).
+Enabling users to authenticate using external identity providers means that support staff no longer need
+to reset passwords for users. This is something that took time for them to do and also could take
+time for them to get to if the service was required at a weekend. Most institutional password
+management systems provide a way for users to reset their passwords without needing assistance,
+so we just leave that to those systems to deal with.
+
+\section{Core Software}
+\label{sec:core_software}
+
+A large amount of software is provided on ilifu, some of which is specific to domains such as CASA
+(https://casa.nrao.edu) based
+astonomy pipeline~\cite{pipelinepaper} 
+developed by IDIA that are used to process most of the MeerKAT data that arrives
+at ilfu. As far as possible application software is managed in singularity containers enabling users
+to access a large number of applications and often multiple versions of the software. Other software, such
+as JupyterHub (https://jupyter.org/hub) support many domains, in this case by 
+supporting multiple
+ kernels that then can run 
+specific notebooks for specific tasks.
+
+Interactive web based applications that are accessible directly from external networked devises include
+the CARTA astronomy visualisation system and Gen3 (http://gen3.org) bioinformatics system. 
+Note that JupyterLab that starts
+JupyterHub instances is also available in this way.
+
+
+\section{IDIA Science Gateway}
+\label{sec:gateway}
+
+As part of a project funded by DIRISA (https://www.dirisa.ac.za) IDIA created a science gateway to access ilifu. The aim was to create
+a portal that would provide a single signon environment to best-in-class web applications with unified branding. 
+This aim was based on 
+previous experience creating the CyberSKA~\cite{cyberska} portal that was run in
+ Canada and South Africa for over fifteen 
+years which
+was created using a portal toolkit. The problem with that was that many of the components needed to written and maintained
+by the team that created the portal. Since CyberSKA used many software 
+layers, maintaining the components was very time consuming, and was necessary when security issues were discovered
+somewhere in the stack.
+Seeking funding for code maintenance is more difficult than gaining funding 
+for new tools, so we wanted to limit the number of
+components that needed to be maintained by ourselves.
+
+Figure~\ref{fig:gateway_design} shows the basic design diagram for the gateway. This was created
+quickly before an IDIA group meeting on a Monday morning. The inital version of the gateway was working one week later and
+exposed to the end users in production form three weeks after this. That compares to years of work that went
+ into creating the CyberSKA gateway
+and shows the power of the tools used to create the gateway.
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.3]{gateway-design01b.png}
+    \caption{High level design of the IDIA Science Gateway.}
+    \label{fig:gateway_design}
+\end{figure}
+
+A few of the more simple components were created by our support team using the Django 
+(https://www.djangoproject.com)
+poral framework.
+These included the Landing Page, an SSH public 
+key management page and a Usage Information
+Page. The purpose of the SSH public key management page was to enable users to add new public keys if
+there was any problem with their current key pair. This was a task previously requested from the
+support team and happened quite often.
+
+Other applications were accessed via an OpenOnDemand (https://openondemand.org) instance that provided fast
+setup and easy configuration (see Figure~\ref{fig:gateway-launch-page}). 
+This was the major key to being able to setup the IDIA Science 
+Gateway so quickly.
+Of the best in class applications JupyterLab is exposed from the OpenOnDemand Dashboard. Also exposed in this
+way are the CARTA (https://cartaviz.org) visualisation system, the Globus (https://globus.org)
+Wide Area Network transfer client interface and the OpenStack Horizan
+Dashboard that is used for configuring the computing environments. Also this year we added access
+to the Singularity Registry (https://singularityhub.github.io/sregistry)
+ that is used to maintain the Singularity 
+containers that provide the majority of software to the ilifu cluster and allows containers to be downloaded
+for use on other systems.
+
+The Data Release pages are exposed using the Wagtail (https://wagtail.org) Content Management System (CMS)
+that is often used with Django. This is exposed from the Front Page, for access to only public data,
+and from within OpenOnDemand to provide access to all the Released data.
+
+
+%\includegraphics[scale=.18]{gateway01.png}
+
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=.17]{gateway04.png}
+    \label{fig:gateway-launch-page}
+\caption{The IDIA Science Gateway application launch page.}
+\end{figure}
+    
+
+%Link in to SAFIRE / Edugain to remove the need to manage user passwords
+%Limit the amount of user support required
+%Spent about a year experimenting with different tools that could help achieve these goals
+%Had many problems with tools being hard to install, not working as advertised or being unreliable
+%Big improvements in certain tools during the first half of 2023 left us ready to work on a deployment
+
+%Diagram.
+%Story of how we got it working so quickly.
+
+%\includegraphics[scale=.9]{gen3.png}
+
+%Include some diagrams from the talk.
+
+
+\section{Users}
+\label{sec:users}
+
+Five of the eight MeerKAT telescope Large Survey projects are run on ilifu. 
+These include:
+\begin{itemize}
+\item LADUMA~\cite{laduma} (Deep neutral hydrogen)
+\item MIGHTEE~\cite{mightee} (Deep continuum imaging of the early universe)
+\item MeerKAT Fornax Survey~\cite{formax} (Deep HI Survey of the Fornax cluster)
+\item MHONGOOSE~\cite{mongoose} (targeted nearby galaxies HI)
+\item ThunderKAT~\cite{thunderkat} (exotic phenomena, variables and transients)
+\end{itemize}
+
+Also research associated with 
+77 MeerKAT Open Time projects and over 20 Director Discretionary Time projects have been supported
+on ilifu to date.
+
+%Talk about multiple countries.
+%Can take counts from the pie charts in talk.
+
+The ilifu cluster was partly funded by the Cbio~\cite{cbio}
+biochemistry group at UCT.
+There are currently about 140 active bioinformatics users and 
+current projects include H3ABioNet~\cite{H3ABioNet}
+and eLwazi (https://elwazi.org/),
+an African led open data science platform that provides an interactive environment 
+to apply data science techniques to 
+diverse datasets for novel health discoveries.
+IDIA staff have worked on updating the Gen3 (http://gen3.org) bioinformatics platform 
+to support eLwazi in the OpenStack
+middleware environment.
+
+
+\section{Summary and Future Work}
+\label{sec:conclusions}
+
+%Would like updated national / international authorization service
+
+The ilifu OpenStack cluster that was established in 2024 supports over 550 regular users working mainly in Astronomy
+and Bioinformatics. The IDIA Science Gateway has been added that enables signon from federated identity providers, and 
+in conjunction with KeyCloak, provides single-signon within the cluster. The use of the OpenStack middleware
+has enabled a very flexible environment, where custom clusters with their own storage connected can be
+created quickly. This provides the ability to support projects that would be difficult to support In
+a conventional high performance computing environment without far more interaction for the cluster's
+support team and without delays caused by needing lower level configuration.
+
+Currently for users of MeerKAT data to get the data to ilifu they need to log into a portal at SARAO
+(https://www.sarao.ac.za)
+and register the need for the transfer. This is one thing we would like to do is streamline that so either
+they can do that directly from the IDIA Gateway, or at least single signon from the IDIA Gateway
+to SARAO. We are currenly looking at how we could best use data replication tools, in particular
+RUCIO (https://rucio.cern.ch) to better schedule the movement of data between SARAO, 
+IDIA and possibly other sites such 
+as CHPC (https://www.chpc.ac.za). We see the need for that to avoid the case where 
+we have the same raw data available
+on multiple systems that could be accessed quickly and avoid users wanting to keep copies locally
+due a lack of clarity on when data will be fetched. This will be aided by planned changes to the
+way that SARAO stores data, but improving automation in this area will help in any case.
+
+Other changes to ilifu itself could be driven by changes in the applications being run.
+For example, IDIA is currently looking at changing the design of the backend of the 
+CARTA visualisation system from a monolithic to a micro-services architecture that could
+provide greater scalability on large clusters and supporting that well will require
+some changes to the ilifu middleware.
+
+We would also like to federate more functions with more sites to enable users to move quickly
+from one cluster to another, or just offload tasks across clusters more simply. We will
+explore funding options to enable this.
+
+%Planning to deploy data replication system to ease tracking of data products
+%Many extensions to CARTA planned
+%Improved collaboration features
+%Experimenting with micro-services architecture
+%Improved deployment for HPC and K8s systems
+%Many additional science features
+%Need to extend the Bioinformatics Science Gateway
+%Need to extend IDIA pipeline to handle MeerKAT+ heterogenous array
+
+%\bibliographystyle{plain}
+%\bibliography{rob.bib}
+
+\printbibliography
+
+\end{document}
