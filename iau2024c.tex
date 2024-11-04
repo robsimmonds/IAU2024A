@@ -8,7 +8,14 @@
 \usepackage{amsmath,amssymb,latexsym,bm,mathrsfs,sansmath,array}
 \usepackage{hyperref}
 %\usepackage{natbib}
-\usepackage[natbib=true]{biblatex}
+%\usepackage[natbib=true]{biblatex}
+
+\usepackage[
+backend=biber,
+style=authoryear,
+sorting=ynt
+]{biblatex}
+
 \addbibresource{rob.bib}
 
 \title{Ilifu: A Cloud Computing System Supporting Astronomy and Bioinformatics}
@@ -124,7 +131,7 @@ Some projects have long-lived cluster environments within ilifu which they maint
 the OpenStack tools.
 Examples of this is the cluster that is used to process the data from the MeerLicht
  (https://science.uct.ac.za/meerlicht) telescope which
-is an optical telescope that tracks the MeerKAT~\cite{meerkat} telescope's observations. 
+is an optical telescope that tracks the MeerKAT~(\cite{meerkat}) telescope's observations. 
 This functionality
 is also employed
 by some of the bioinformatics projects to support custom environments and used to add
@@ -152,7 +159,7 @@ so we leave that to those systems to deal with.
 
 A large amount of software is provided on ilifu, some of which is specific to domains such as {\sc CASA}
 (https://casa.nrao.edu) based
-astonomy pipeline~\cite{pipelinepaper} 
+astonomy pipeline~(\cite{pipelinepaper})
 developed by IDIA that is used to process most of the MeerKAT data that arrives
 at {\sc ilfu}. As far as possible application software is managed in Singularity containers enabling users
 to access a large number of applications and often multiple versions of the software. Other software, such
@@ -174,7 +181,7 @@ As part of a project funded by The Data Intensive Research Initiative of South A
 IDIA created a science gateway to access {\sc ilifu}. The aim was to create
 a portal that would provide a single sign-on environment to best-in-class web applications with unified branding. 
 This aim was based on 
-previous experience creating the CyberSKA~\cite{cyberska} portal that was run in
+previous experience creating the CyberSKA~(\cite{cyberska}) portal that was run in
  Canada and South Africa for over fifteen 
 years which
 was created using a portal toolkit. The problem with that was that many of the components needed to written and maintained
@@ -193,7 +200,7 @@ and shows the power of the tools used to create the gateway.
 
 \begin{figure}
     \centering
-    \includegraphics[scale=0.55]{gateway-design01b.png}
+    \includegraphics[scale=0.393]{gateway-design01e.png}
     \caption{High level design of the IDIA Science Gateway.}
     \label{fig:gateway_design}
 \end{figure}
@@ -256,11 +263,11 @@ and from within OpenOnDemand to provide access to all the released data.
 Five of the eight MeerKAT telescope Large Survey projects are run on ilifu. 
 These include:
 \begin{itemize}
-\item LADUMA~\cite{laduma} (Deep neutral hydrogen)
-\item MIGHTEE~\cite{mightee} (Deep continuum imaging of the early universe)
-\item MeerKAT Fornax Survey~\cite{formax} (Deep HI Survey of the Fornax cluster)
-\item MHONGOOSE~\cite{mongoose} (targeted nearby galaxies HI)
-\item ThunderKAT~\cite{thunderkat} (exotic phenomena, variables and transients)
+\item LADUMA (\cite{laduma}) (Deep neutral hydrogen)
+\item MIGHTEE~(\cite{mightee}) (Deep continuum imaging of the early universe)
+\item MeerKAT Fornax Survey~(\cite{formax}) (Deep HI Survey of the Fornax cluster)
+\item MHONGOOSE~(\cite{mongoose}) (targeted nearby galaxies HI)
+\item ThunderKAT~(\cite{thunderkat}) (exotic phenomena, variables and transients)
 \end{itemize}
 
 Research associated with 
@@ -270,10 +277,10 @@ on ilifu to date.
 %Talk about multiple countries.
 %Can take counts from the pie charts in talk.
 
-The ilifu cluster was partly funded by the Cbio~\cite{cbio}
+The ilifu cluster was partly funded by the Cbio~(\cite{cbio})
 biochemistry group at UCT.
 There are currently about 140 active bioinformatics users and 
-current projects include H3ABioNet~\cite{H3ABioNet}
+current projects include H3ABioNet~(\cite{H3ABioNet})
 and eLwazi (https://elwazi.org/),
 an African led open data science platform that provides an interactive environment 
 to apply data science techniques to 
